@@ -155,12 +155,6 @@
     gap: 4px;
 }
 
-.placeholder-nav-title-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    justify-content: center;
-}
 
 .placeholder-nav-title {
     font-family: 'Courier New', monospace;
@@ -183,16 +177,25 @@
     gap: 15px;
 }
 
-/* 제어 버튼 행 */
+/* 라디오 버튼과 제어 버튼 행 */
 .placeholder-control-row {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
     gap: 12px;
     padding: 12px 16px;
     background: var(--black30a);
     border: 1px solid var(--SmartThemeBorderColor);
     border-radius: 8px;
+}
+
+.placeholder-enabled-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: var(--mainFontSize);
+    color: var(--SmartThemeBodyColor);
+    user-select: none;
 }
 
 .placeholder-radio {
@@ -214,18 +217,6 @@
     border-color: var(--SmartThemeQuoteColor);
 }
 
-.placeholder-radio:checked::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 6px;
-    height: 6px;
-    background-color: var(--SmartThemeBodyColor);
-    border-radius: 50%;
-}
-
 .placeholder-radio:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(var(--SmartThemeQuoteColorRGB), 0.3);
@@ -244,6 +235,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-left: auto;
 }
 
 .clear-content-btn:hover {
