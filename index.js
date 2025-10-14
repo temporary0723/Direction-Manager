@@ -171,7 +171,7 @@ function showCompactUIPopup() {
                     <i class="fa-solid fa-chevron-left"></i>
                 </button>
                 <div class="dm-compact--title-row">
-                    <input type="radio" class="dm-compact--radio" ${settings.enabled ? 'checked' : ''}>
+                    <input type="checkbox" class="dm-compact--radio" ${settings.enabled ? 'checked' : ''}>
                     <div class="dm-compact--title">${currentPlaceholder.name}</div>
                 </div>
                 <button class="dm-compact--nav dm-compact--clear" title="내용 지우기">

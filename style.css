@@ -112,11 +112,17 @@
     transition: all 0.2s ease;
     position: relative;
     flex-shrink: 0;
+    outline: none;
 }
 
 .dm-compact--radio:checked {
     background-color: var(--SmartThemeQuoteColor);
     border-color: var(--SmartThemeQuoteColor);
+}
+
+.dm-compact--radio:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 .dm-compact--content {
