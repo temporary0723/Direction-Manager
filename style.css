@@ -198,13 +198,13 @@
     user-select: none;
 }
 
-.placeholder-radio {
+.placeholder-checkbox {
     appearance: none;
     -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border: 2px solid var(--SmartThemeBorderColor);
-    border-radius: 50%;
+    border-radius: 3px;
     background-color: var(--black30a);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -212,12 +212,23 @@
     flex-shrink: 0;
 }
 
-.placeholder-radio:checked {
+.placeholder-checkbox:checked {
     background-color: var(--SmartThemeQuoteColor);
     border-color: var(--SmartThemeQuoteColor);
 }
 
-.placeholder-radio:focus {
+.placeholder-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--SmartThemeBodyColor);
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.placeholder-checkbox:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(var(--SmartThemeQuoteColorRGB), 0.3);
 }
