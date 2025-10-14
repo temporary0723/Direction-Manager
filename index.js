@@ -1,5 +1,5 @@
-// Direction-Manager 확장 - 3개 고정 플레이스홀더 관리
-import { extension_settings, getContext, loadExtensionSettings, renderExtensionTemplateAsync } from "../../../extensions.js";
+// Direction-Manager 확장 - 3개 고정 플레이스홀더 관리 (컴팩트 UI 전용)
+import { extension_settings, getContext } from "../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../script.js";
 
 // 확장 설정
@@ -43,158 +43,6 @@ async function loadSettings() {
     }
 }
 
-// 플레이스홀더 창 열기
-async function openDirectionManagerPopup() {
-    const template = $(await renderExtensionTemplateAsync(`third-party/${extensionName}`, 'template'));
-    
-    // 첫 번째 플레이스홀더로 초기화
-    currentPlaceholderIndex = 0;
-    
-    // UI 렌더링
-    renderPlaceholderEditor(template);
-    
-    // 이벤트 리스너 추가
-    setupEventListeners(template);
-    
-    // 커스텀 모달로 표시
-    showCustomModal(template.html(), 'Direction Manager');
-}
-
-// 커스텀 모달 표시
-function showCustomModal(content, title) {
-    // 기존 모달이 있으면 제거
-    $('.custom-modal-backdrop').remove();
-    
-    const modalHtml = `
-        <div class="custom-modal-backdrop">
-            <div class="custom-modal">
-                <div class="custom-modal-header">
-                    <h3>${title}</h3>
-                    <button class="custom-modal-close" title="닫기">×</button>
-                </div>
-                <div class="custom-modal-body">
-                    ${content}
-                </div>
-            </div>
-        </div>
-    `;
-    
-    const modal = $(modalHtml);
-    $('body').append(modal);
-    
-    // 애니메이션을 위한 클래스 추가
-    setTimeout(() => {
-        modal.addClass('visible');
-        modal.find('.custom-modal').addClass('visible');
-    }, 10);
-    
-    // 이벤트 핸들러 설정
-    modal.on('click', (e) => {
-        if (e.target === modal[0]) {
-            closeCustomModal(modal);
-        }
-    });
-    
-    modal.find('.custom-modal-close').on('click', () => {
-        closeCustomModal(modal);
-    });
-    
-    // ESC 키로 닫기
-    $(document).on('keydown.customModal', (e) => {
-        if (e.key === 'Escape') {
-            closeCustomModal(modal);
-        }
-    });
-    
-    // 모달 내의 요소들에 대해 이벤트 리스너 재설정
-    const modalTemplate = modal.find('.custom-modal-body');
-    renderPlaceholderEditor(modalTemplate);
-    setupEventListeners(modalTemplate);
-}
-
-// 커스텀 모달 닫기
-function closeCustomModal(modal) {
-    modal.removeClass('visible');
-    modal.find('.custom-modal').removeClass('visible');
-    
-    setTimeout(() => {
-        modal.remove();
-    }, 300);
-    
-    // 키보드 이벤트 핸들러 제거
-    $(document).off('keydown.customModal');
-}
-
-// 플레이스홀더 편집기 렌더링
-function renderPlaceholderEditor(template) {
-    const currentPlaceholder = placeholders[currentPlaceholderIndex];
-    const settings = extension_settings[extensionName][currentPlaceholder.key];
-    
-    // 네비게이션 업데이트
-    template.find('.placeholder-nav-title').text(currentPlaceholder.name);
-    template.find('.placeholder-nav-counter').text(`${currentPlaceholderIndex + 1} / ${placeholders.length}`);
-    
-    // 라디오 버튼 상태 설정
-    template.find('#placeholder-enabled').prop('checked', settings.enabled);
-    
-    // 텍스트 에리어 내용 설정
-    template.find('#placeholder-content').val(settings.content);
-    
-    // 이전/다음 버튼 상태 업데이트
-    template.find('.nav-prev').prop('disabled', currentPlaceholderIndex === 0);
-    template.find('.nav-next').prop('disabled', currentPlaceholderIndex === placeholders.length - 1);
-}
-
-// 이벤트 리스너 설정
-function setupEventListeners(template) {
-    // 이전 버튼
-    template.find('.nav-prev').off('click').on('click', function() {
-        if (currentPlaceholderIndex > 0) {
-            currentPlaceholderIndex--;
-            renderPlaceholderEditor(template);
-        }
-    });
-    
-    // 다음 버튼
-    template.find('.nav-next').off('click').on('click', function() {
-        if (currentPlaceholderIndex < placeholders.length - 1) {
-            currentPlaceholderIndex++;
-            renderPlaceholderEditor(template);
-        }
-    });
-    
-    // 라디오 버튼 변경 이벤트
-    template.find('#placeholder-enabled').off('change').on('change', function() {
-        const currentPlaceholder = placeholders[currentPlaceholderIndex];
-        const isEnabled = $(this).is(':checked');
-        
-        extension_settings[extensionName][currentPlaceholder.key].enabled = isEnabled;
-        applyPlaceholderToSystem(currentPlaceholder);
-        saveSettingsDebounced();
-    });
-    
-    // 텍스트 에리어 변경 이벤트
-    template.find('#placeholder-content').off('input').on('input', function() {
-        const currentPlaceholder = placeholders[currentPlaceholderIndex];
-        const newContent = $(this).val();
-        
-        extension_settings[extensionName][currentPlaceholder.key].content = newContent;
-        applyPlaceholderToSystem(currentPlaceholder);
-        saveSettingsDebounced();
-    });
-    
-    // 내용 지우기 버튼
-    template.find('.clear-content-btn').off('click').on('click', function() {
-        const confirmed = confirm('이 플레이스홀더의 내용을 모두 지우시겠습니까?');
-        if (confirmed) {
-            const currentPlaceholder = placeholders[currentPlaceholderIndex];
-            extension_settings[extensionName][currentPlaceholder.key].content = "";
-            template.find('#placeholder-content').val('');
-            applyPlaceholderToSystem(currentPlaceholder);
-            saveSettingsDebounced();
-        }
-    });
-}
 
 // 플레이스홀더를 시스템에 적용
 function applyPlaceholderToSystem(placeholder) {
@@ -322,10 +170,10 @@ function showCompactUIPopup() {
                 <button class="dm-compact--nav dm-compact--prev" title="이전 플레이스홀더">
                     <i class="fa-solid fa-chevron-left"></i>
                 </button>
-                <div class="dm-compact--title">${currentPlaceholder.name}</div>
-                <label class="dm-compact--checkbox-label" title="사용 여부">
-                    <input type="checkbox" class="dm-compact--checkbox" ${settings.enabled ? 'checked' : ''}>
-                </label>
+                <div class="dm-compact--title-row">
+                    <input type="radio" class="dm-compact--radio" ${settings.enabled ? 'checked' : ''}>
+                    <div class="dm-compact--title">${currentPlaceholder.name}</div>
+                </div>
                 <button class="dm-compact--nav dm-compact--clear" title="내용 지우기">
                     <i class="fa-solid fa-eraser"></i>
                 </button>
@@ -367,8 +215,8 @@ function setupCompactUIEventListeners() {
         navigateCompactPlaceholder(1);
     });
     
-    // 체크박스 변경 이벤트
-    compactUIPopup.find('.dm-compact--checkbox').on('change', function() {
+    // 라디오 버튼 변경 이벤트
+    compactUIPopup.find('.dm-compact--radio').on('change', function() {
         const isEnabled = $(this).is(':checked');
         const currentPlaceholder = placeholders[currentPlaceholderIndex];
         
@@ -428,7 +276,7 @@ function navigateCompactPlaceholder(direction) {
     const settings = extension_settings[extensionName][currentPlaceholder.key];
     
     compactUIPopup.find('.dm-compact--title').text(currentPlaceholder.name);
-    compactUIPopup.find('.dm-compact--checkbox').prop('checked', settings.enabled);
+    compactUIPopup.find('.dm-compact--radio').prop('checked', settings.enabled);
     compactUIPopup.find('.dm-compact--textarea')
         .val(settings.content || '')
         .prop('disabled', !settings.enabled);

@@ -1,299 +1,5 @@
-/* Direction-Manager 확장 스타일 - 3개 고정 플레이스홀더 관리 */
+/* Direction-Manager 확장 스타일 - 컴팩트 UI 전용 */
 
-/* 커스텀 모달 스타일 */
-.custom-modal-backdrop {
-    display: none;
-    position: fixed;
-    z-index: 10000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.9) !important;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.custom-modal-backdrop.visible {
-    display: flex !important;
-    opacity: 1;
-}
-
-.custom-modal {
-    background: var(--SmartThemeBlurTintColor) !important;
-    color: var(--SmartThemeBodyColor) !important;
-    border: 1px solid var(--SmartThemeBorderColor) !important;
-    border-radius: 16px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-    width: 600px;
-    max-width: 95vw;
-    height: 70vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    position: relative;
-    z-index: 10001;
-    opacity: 0;
-    transform: scale(0.98);
-    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.custom-modal.visible {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.custom-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 20px !important;
-    border-bottom: 1px solid var(--SmartThemeBorderColor) !important;
-    flex-shrink: 0;
-    background: var(--SmartThemeBlurTintColor) !important;
-    gap: 10px;
-}
-
-.custom-modal-header h3 {
-    margin: 0;
-    font-weight: 600;
-    font-size: 16px;
-    flex-grow: 1;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--SmartThemeBodyColor) !important;
-    user-select: none;
-}
-
-.custom-modal-close {
-    background: transparent !important;
-    border: none !important;
-    color: var(--SmartThemeBodyColor) !important;
-    font-size: 28px;
-    font-weight: 300;
-    cursor: pointer;
-    padding: 8px;
-    line-height: 1;
-    transition: all 0.2s ease;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.custom-modal-close:hover {
-    color: var(--SmartThemeQuoteColor) !important;
-    transform: rotate(90deg);
-}
-
-.custom-modal-body {
-    padding: 20px;
-    overflow-y: auto;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-/* 플레이스홀더 네비게이션 헤더 */
-.placeholder-nav-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    padding: 12px 16px;
-    background: var(--black30a);
-    border: 1px solid var(--SmartThemeBorderColor);
-    border-radius: 8px;
-}
-
-.placeholder-nav-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.nav-btn {
-    background: var(--SmartThemeBlurTintColor);
-    border: 1px solid var(--SmartThemeBorderColor);
-    color: var(--SmartThemeBodyColor);
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    font-size: 14px;
-}
-
-.nav-btn:hover:not(:disabled) {
-    background-color: var(--SmartThemeQuoteColor);
-    color: var(--SmartThemeBodyColor);
-    border-color: var(--SmartThemeQuoteColor);
-}
-
-.nav-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background-color: var(--SmartThemeBlurTintColor);
-    color: var(--grey30);
-}
-
-.placeholder-nav-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-}
-
-
-.placeholder-nav-title {
-    font-family: 'Courier New', monospace;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--SmartThemeQuoteColor);
-}
-
-.placeholder-nav-counter {
-    font-size: 12px;
-    color: var(--SmartThemeBodyColor);
-    opacity: 0.7;
-}
-
-/* 플레이스홀더 편집 영역 */
-.placeholder-editor {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    gap: 15px;
-}
-
-/* 라디오 버튼과 제어 버튼 행 */
-.placeholder-control-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    background: var(--black30a);
-    border: 1px solid var(--SmartThemeBorderColor);
-    border-radius: 8px;
-}
-
-.placeholder-enabled-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: var(--mainFontSize);
-    color: var(--SmartThemeBodyColor);
-    user-select: none;
-}
-
-.placeholder-checkbox {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    border: 2px solid var(--SmartThemeBorderColor);
-    border-radius: 3px;
-    background-color: var(--black30a);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    flex-shrink: 0;
-}
-
-.placeholder-checkbox:checked {
-    background-color: var(--SmartThemeQuoteColor);
-    border-color: var(--SmartThemeQuoteColor);
-}
-
-.placeholder-checkbox:checked::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: var(--SmartThemeBodyColor);
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.placeholder-checkbox:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(var(--SmartThemeQuoteColorRGB), 0.3);
-}
-
-.clear-content-btn {
-    padding: 8px 12px;
-    background-color: var(--SmartThemeBlurTintColor);
-    border: 1px solid var(--SmartThemeBorderColor);
-    border-radius: 5px;
-    color: var(--SmartThemeBodyColor);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 16px;
-    min-width: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: auto;
-}
-
-.clear-content-btn:hover {
-    background-color: var(--SmartThemeQuoteColor);
-    color: var(--SmartThemeBodyColor);
-    transform: scale(1.05);
-}
-
-/* 내용 텍스트 에리어 */
-.placeholder-content-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.placeholder-textarea {
-    flex: 1;
-    padding: 12px;
-    border: 1px solid var(--SmartThemeBorderColor);
-    border-radius: 8px;
-    background-color: var(--black30a);
-    color: var(--SmartThemeBodyColor);
-    font-family: inherit;
-    font-size: var(--mainFontSize);
-    resize: none;
-    box-sizing: border-box;
-    transition: all 0.2s ease;
-    line-height: 1.5;
-    min-height: 200px;
-}
-
-.placeholder-textarea:focus {
-    outline: none;
-    border-color: var(--SmartThemeQuoteColor);
-    box-shadow: 0 0 0 2px rgba(var(--SmartThemeQuoteColorRGB), 0.3);
-}
-
-.placeholder-textarea::placeholder {
-    color: var(--grey30);
-    opacity: 0.7;
-}
-
-.placeholder-textarea:disabled {
-    opacity: 0.6;
-    background-color: var(--SmartThemeBlurTintColor);
-    cursor: not-allowed;
-}
 
 /* 컴팩트 UI 버튼 스타일 */
 .dm-compact--button {
@@ -376,9 +82,15 @@
     border-color: var(--SmartThemeQuoteColor);
 }
 
-.dm-compact--title {
+.dm-compact--title-row {
     flex: 1;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.dm-compact--title {
     font-family: 'Courier New', monospace;
     font-size: 14px;
     font-weight: 600;
@@ -388,40 +100,23 @@
     text-overflow: ellipsis;
 }
 
-.dm-compact--checkbox-label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    margin: 0;
-}
-
-.dm-compact--checkbox {
+.dm-compact--radio {
     appearance: none;
     -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     border: 2px solid var(--SmartThemeBorderColor);
-    border-radius: 3px;
+    border-radius: 50%;
     background-color: var(--black30a);
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
+    flex-shrink: 0;
 }
 
-.dm-compact--checkbox:checked {
+.dm-compact--radio:checked {
     background-color: var(--SmartThemeQuoteColor);
     border-color: var(--SmartThemeQuoteColor);
-}
-
-.dm-compact--checkbox:checked::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: var(--SmartThemeBodyColor);
-    font-size: 10px;
-    font-weight: bold;
 }
 
 .dm-compact--content {
@@ -464,33 +159,6 @@
 
 /* 태블릿 반응형 디자인 */
 @media (max-width: 950px) {
-    .custom-modal-backdrop {
-        align-items: flex-start;
-        padding-top: 3vh;
-        padding-bottom: 3vh;
-    }
-    
-    .custom-modal {
-        width: 95vw;
-        height: 94vh;
-        max-width: none;
-        transform: scale(0.98);
-        position: relative;
-        margin: 0 auto;
-    }
-    
-    .custom-modal.visible {
-        transform: scale(1);
-    }
-    
-    .custom-modal-header {
-        padding: 8px 12px !important;
-    }
-    
-    .custom-modal-body {
-        padding: 12px;
-    }
-    
     .dm-compact--popup {
         width: 380px;
     }
@@ -498,63 +166,6 @@
 
 /* 스마트폰 반응형 디자인 */
 @media (max-width: 480px) {
-    .custom-modal-backdrop {
-        padding-top: 2vh;
-        padding-bottom: 2vh;
-    }
-    
-    .custom-modal {
-        width: 98vw;
-        height: 96vh;
-        border-radius: 8px;
-    }
-    
-    .custom-modal-header {
-        padding: 6px 10px !important;
-    }
-    
-    .custom-modal-header h3 {
-        font-size: 14px;
-    }
-    
-    .custom-modal-close {
-        width: 32px;
-        height: 32px;
-        font-size: 20px;
-    }
-    
-    .custom-modal-body {
-        padding: 8px;
-    }
-    
-    .placeholder-nav-header {
-        padding: 8px 12px;
-        margin-bottom: 15px;
-    }
-    
-    .placeholder-nav-title {
-        font-size: 14px;
-    }
-    
-    .placeholder-nav-counter {
-        font-size: 11px;
-    }
-    
-    .nav-btn {
-        width: 28px;
-        height: 28px;
-        font-size: 12px;
-    }
-    
-    .placeholder-control-row {
-        padding: 8px 12px;
-        gap: 8px;
-    }
-    
-    .placeholder-textarea {
-        min-height: 150px;
-    }
-    
     .dm-compact--popup {
         width: 320px;
     }
@@ -574,13 +185,9 @@
         font-size: 12px;
     }
     
-    .dm-compact--checkbox {
-        width: 14px;
-        height: 14px;
-    }
-    
-    .dm-compact--checkbox:checked::after {
-        font-size: 8px;
+    .dm-compact--radio {
+        width: 12px;
+        height: 12px;
     }
     
     .dm-compact--content {
@@ -594,24 +201,20 @@
 }
 
 /* 스크롤바 스타일 */
-.custom-modal-body::-webkit-scrollbar,
 .dm-compact--textarea::-webkit-scrollbar {
     width: 8px;
 }
 
-.custom-modal-body::-webkit-scrollbar-track,
 .dm-compact--textarea::-webkit-scrollbar-track {
     background: var(--black30a);
     border-radius: 4px;
 }
 
-.custom-modal-body::-webkit-scrollbar-thumb,
 .dm-compact--textarea::-webkit-scrollbar-thumb {
     background: var(--SmartThemeBorderColor);
     border-radius: 4px;
 }
 
-.custom-modal-body::-webkit-scrollbar-thumb:hover,
 .dm-compact--textarea::-webkit-scrollbar-thumb:hover {
     background: var(--SmartThemeQuoteColor);
 }
