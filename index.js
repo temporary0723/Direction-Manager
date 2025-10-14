@@ -205,8 +205,10 @@ function applyPlaceholderToSystem(placeholder) {
         if (placeholder.isCustom) {
             // 커스텀 플레이스홀더는 시스템에서 제거
             removePlaceholderFromSystem(placeholder.key);
+        } else {
+            // 사전등록된 플레이스홀더는 덮어쓴 값을 제거하여 원래 시스템 값으로 복원
+            restoreSystemPlaceholder(placeholder.key);
         }
-        // 사전등록된 플레이스홀더는 값을 대체하지 않음 (원래 값 유지)
         return;
     }
     
@@ -242,7 +244,12 @@ function replaceSystemPlaceholder(key, content) {
     try {
         const context = getContext();
         if (context && context.registerMacro) {
-            // 기존 매크로 덮어쓰기
+            // 기존 매크로가 있으면 먼저 제거 (깔끔한 덮어쓰기를 위해)
+            if (context.unregisterMacro) {
+                context.unregisterMacro(key);
+            }
+            
+            // 새로운 값으로 매크로 등록
             context.registerMacro(key, content || '', `Direction Manager override: ${key}`);
         }
     } catch (error) {
@@ -259,6 +266,20 @@ function removePlaceholderFromSystem(key) {
         }
     } catch (error) {
         console.warn('Failed to remove placeholder from system:', error);
+    }
+}
+
+// 시스템 플레이스홀더를 원래 값으로 복원
+function restoreSystemPlaceholder(key) {
+    try {
+        const context = getContext();
+        if (context && context.unregisterMacro) {
+            // Direction Manager가 덮어쓴 매크로를 제거
+            context.unregisterMacro(key);
+        }
+        // 시스템이 원래 매크로를 자동으로 복원함
+    } catch (error) {
+        console.warn('Failed to restore system placeholder:', error);
     }
 }
 
