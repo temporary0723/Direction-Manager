@@ -450,7 +450,7 @@ function addCompactUIButton() {
     
     const buttonHtml = `
         <div class="dm-compact--button menu_button" title="Direction Manager 빠른 편집">
-            <i class="fa-solid fa-compass"></i>
+            <i class="fa-solid fa-feather"></i>
         </div>
     `;
     

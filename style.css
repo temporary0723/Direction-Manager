@@ -155,6 +155,13 @@
     gap: 4px;
 }
 
+.placeholder-nav-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+}
+
 .placeholder-nav-title {
     font-family: 'Courier New', monospace;
     font-size: 16px;
@@ -176,10 +183,11 @@
     gap: 15px;
 }
 
-/* 라디오 버튼과 제목 행 */
+/* 제어 버튼 행 */
 .placeholder-control-row {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 12px;
     padding: 12px 16px;
     background: var(--black30a);
@@ -187,21 +195,11 @@
     border-radius: 8px;
 }
 
-.placeholder-enabled-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: var(--mainFontSize);
-    color: var(--SmartThemeBodyColor);
-    user-select: none;
-}
-
 .placeholder-radio {
     appearance: none;
     -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     border: 2px solid var(--SmartThemeBorderColor);
     border-radius: 50%;
     background-color: var(--black30a);
@@ -222,8 +220,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     background-color: var(--SmartThemeBodyColor);
     border-radius: 50%;
 }
@@ -246,7 +244,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: auto;
 }
 
 .clear-content-btn:hover {
@@ -320,8 +317,6 @@
 
 .dm-compact--button.dm-compact--hasPopup {
     opacity: 1;
-    background-color: var(--SmartThemeQuoteColor);
-    color: var(--SmartThemeBodyColor);
 }
 
 /* 컴팩트 UI 팝업 스타일 */
