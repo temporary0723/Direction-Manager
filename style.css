@@ -401,7 +401,7 @@
     width: 16px;
     height: 16px;
     border: 2px solid var(--SmartThemeBorderColor);
-    border-radius: 50%;
+    border-radius: 3px;
     background-color: var(--black30a);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -414,15 +414,14 @@
 }
 
 .dm-compact--checkbox:checked::after {
-    content: '';
+    content: '✓';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 6px;
-    height: 6px;
-    background-color: var(--SmartThemeBodyColor);
-    border-radius: 50%;
+    color: var(--SmartThemeBodyColor);
+    font-size: 10px;
+    font-weight: bold;
 }
 
 .dm-compact--content {
@@ -581,8 +580,7 @@
     }
     
     .dm-compact--checkbox:checked::after {
-        width: 5px;
-        height: 5px;
+        font-size: 8px;
     }
     
     .dm-compact--content {
