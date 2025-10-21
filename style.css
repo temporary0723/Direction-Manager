@@ -125,11 +125,6 @@
     box-shadow: none;
 }
 
-.dm-compact--radio:checked:focus {
-    outline: none;
-    box-shadow: none;
-}
-
 .dm-compact--content {
     padding: 8px;
 }
