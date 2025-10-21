@@ -118,11 +118,24 @@
 .dm-compact--radio:checked {
     background-color: var(--SmartThemeQuoteColor);
     border-color: var(--SmartThemeQuoteColor);
-}
-
-.dm-compact--radio:focus {
     outline: none;
     box-shadow: none;
+}
+
+.dm-compact--radio:focus,
+.dm-compact--radio:active,
+.dm-compact--radio:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: var(--SmartThemeBorderColor);
+}
+
+.dm-compact--radio:checked:focus,
+.dm-compact--radio:checked:active,
+.dm-compact--radio:checked:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: var(--SmartThemeQuoteColor);
 }
 
 .dm-compact--content {
