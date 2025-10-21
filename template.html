@@ -1,0 +1,36 @@
+<!-- Direction-Manager 템플릿 -->
+<div class="dm-compact--popup">
+    <div class="dm-compact--header">
+        <div class="dm-compact--title-row">
+            <span class="dm-compact--title">Direction Manager</span>
+        </div>
+    </div>
+    
+    <div class="dm-compact--content">
+        <!-- 방향 선택 라디오버튼들 -->
+        <div style="margin-bottom: 10px;">
+            <label style="display: flex; align-items: center; margin-bottom: 5px; cursor: pointer;">
+                <input type="radio" name="direction" value="north" class="dm-compact--radio">
+                <span style="margin-left: 8px;">북쪽 (North)</span>
+            </label>
+            <label style="display: flex; align-items: center; margin-bottom: 5px; cursor: pointer;">
+                <input type="radio" name="direction" value="south" class="dm-compact--radio">
+                <span style="margin-left: 8px;">남쪽 (South)</span>
+            </label>
+            <label style="display: flex; align-items: center; margin-bottom: 5px; cursor: pointer;">
+                <input type="radio" name="direction" value="east" class="dm-compact--radio">
+                <span style="margin-left: 8px;">동쪽 (East)</span>
+            </label>
+            <label style="display: flex; align-items: center; margin-bottom: 5px; cursor: pointer;">
+                <input type="radio" name="direction" value="west" class="dm-compact--radio">
+                <span style="margin-left: 8px;">서쪽 (West)</span>
+            </label>
+        </div>
+        
+        <!-- 내용 입력 텍스트에어리어 -->
+        <textarea 
+            class="dm-compact--textarea" 
+            placeholder="방향에 대한 설명을 입력하세요..."
+        ></textarea>
+    </div>
+</div>
