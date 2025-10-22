@@ -149,6 +149,19 @@ function applyAllPlaceholders() {
     });
 }
 
+// 모든 플레이스홀더 제거
+function removeAllPlaceholders() {
+    placeholders.forEach(placeholder => {
+        if (placeholder.isCustom) {
+            // 커스텀 플레이스홀더는 시스템에서 제거
+            removePlaceholderFromSystem(placeholder.key);
+        } else {
+            // 사전등록된 플레이스홀더는 원래 시스템 값으로 복원
+            restoreSystemPlaceholder(placeholder.key);
+        }
+    });
+}
+
 // 컴팩트 UI 팝업 닫기
 function closeCompactUIPopup() {
     if (compactUIPopup) {
@@ -316,6 +329,14 @@ function addCompactUIButton() {
     compactUIButton = $(buttonHtml);
     $(ta).after(compactUIButton);
     
+    // 확장 활성화 상태에 따라 버튼 표시/숨김
+    const settings = extension_settings[extensionName];
+    if (settings && settings.extensionEnabled) {
+        compactUIButton.show();
+    } else {
+        compactUIButton.hide();
+    }
+    
     // 클릭 이벤트
     compactUIButton.on('click', showCompactUIPopup);
 }
@@ -352,9 +373,29 @@ function updateExtensionMenuUI() {
 
 // 확장 메뉴 이벤트 핸들러 설정
 function setupExtensionMenuEventHandlers() {
-    // 활성화 체크박스 변경 이벤트
+    // 활성화 체크박스 변경 이벤트 (전체 확장 기능 제어)
     $('#direction_manager_enabled').on('change', function() {
-        extension_settings[extensionName].extensionEnabled = $(this).is(':checked');
+        const isEnabled = $(this).is(':checked');
+        extension_settings[extensionName].extensionEnabled = isEnabled;
+        
+        if (isEnabled) {
+            // 확장 활성화 시: 컴팩트 UI 버튼 표시 및 모든 플레이스홀더 적용
+            if (compactUIButton) {
+                compactUIButton.show();
+            }
+            applyAllPlaceholders();
+        } else {
+            // 확장 비활성화 시: 컴팩트 UI 버튼 숨김 및 모든 매크로 제거
+            if (compactUIButton) {
+                compactUIButton.hide();
+                // 팝업이 열려있으면 닫기
+                if (compactUIPopup) {
+                    closeCompactUIPopup();
+                }
+            }
+            removeAllPlaceholders();
+        }
+        
         saveSettingsDebounced();
     });
     
@@ -381,6 +422,11 @@ function injectDirectionPrompt(data) {
         return;
     }
     
+    // Direction 토글이 비활성화되어 있으면 주입하지 않음
+    if (!settings.direction.enabled) {
+        return;
+    }
+    
     // 프롬프트가 비어있으면 주입하지 않음
     if (!settings.directionPrompt || settings.directionPrompt.trim() === '') {
         return;
@@ -390,7 +436,7 @@ function injectDirectionPrompt(data) {
     let processedPrompt = settings.directionPrompt;
     
     // {{direction}} 플레이스홀더 치환
-    if (settings.direction.enabled && settings.direction.content) {
+    if (settings.direction.content) {
         processedPrompt = processedPrompt.replace(/\{\{direction\}\}/g, settings.direction.content);
     } else {
         processedPrompt = processedPrompt.replace(/\{\{direction\}\}/g, '');
