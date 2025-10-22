@@ -6,6 +6,15 @@ import { saveSettingsDebounced, eventSource, event_types } from "../../../../scr
 const extensionName = "Direction-Manager";
 const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
 const extensionSettings = extension_settings[extensionName];
+// 기본 Direction 프롬프트
+const DEFAULT_DIRECTION_PROMPT = `## Directions
+
+- Craft a story based on the director's forthcoming instructions. Feel free to adhere strictly to the directions or embellish them for a more compelling narrative.
+
+- The director is only providing a preliminary draft; refine the sentences into natural-sounding prose instead of directly quoting them. Feel free to embellish them for a more compelling narrative. Enhance the plausibility to ensure the director's proposed narrative unfolds seamlessly.
+
+[Direction(If blank, respond freely): {{direction}}]`;
+
 const defaultSettings = {
     direction: {
         enabled: true,
@@ -19,14 +28,9 @@ const defaultSettings = {
         enabled: true,
         content: ""
     },
+    // 확장 메뉴 설정
     extensionEnabled: true,
-    directionPrompt: `## Directions
-
-- Craft a story based on the director's forthcoming instructions. Feel free to adhere strictly to the directions or embellish them for a more compelling narrative.
-
-- The director is only providing a preliminary draft; refine the sentences into natural-sounding prose instead of directly quoting them. Feel free to embellish them for a more compelling narrative. Enhance the plausibility to ensure the director's proposed narrative unfolds seamlessly.
-
-[Direction(If blank, respond freely): {{direction}}]`
+    directionPrompt: DEFAULT_DIRECTION_PROMPT
 };
 
 // 현재 선택된 플레이스홀더 인덱스
@@ -48,56 +52,7 @@ async function loadSettings() {
     extension_settings[extensionName] = extension_settings[extensionName] || {};
     if (Object.keys(extension_settings[extensionName]).length === 0) {
         Object.assign(extension_settings[extensionName], defaultSettings);
-    } else {
-        // 새로운 설정 항목들이 없으면 기본값으로 추가
-        if (extension_settings[extensionName].extensionEnabled === undefined) {
-            extension_settings[extensionName].extensionEnabled = defaultSettings.extensionEnabled;
-        }
-        if (extension_settings[extensionName].directionPrompt === undefined) {
-            extension_settings[extensionName].directionPrompt = defaultSettings.directionPrompt;
-        }
     }
-}
-
-// UI 업데이트
-function updateUI() {
-    // 설정 폼이 존재할 때만 업데이트
-    if ($('#direction_manager_enabled').length) {
-        $('#direction_manager_enabled').prop(
-            'checked',
-            extension_settings[extensionName].extensionEnabled
-        );
-        $('#direction_prompt_text').val(
-            extension_settings[extensionName].directionPrompt
-        );
-    }
-}
-
-// 설정 페면 생성
-async function createSettings(settingsHtml) {
-    // 설정 컨테이너 생성
-    if (!$('#direction_manager_container').length) {
-        $('#extensions_settings2').append(
-            '<div id="direction_manager_container" class="extension_container"></div>'
-        );
-    }
-
-    $('#direction_manager_container').empty().append(settingsHtml);
-
-    // 이벤트 핸들러 추가
-    $('#direction_manager_enabled').on('change', function() {
-        extension_settings[extensionName].extensionEnabled = $(this).prop('checked');
-        updateUI();
-        saveSettingsDebounced();
-    });
-
-    $('#direction_prompt_text').on('input', function() {
-        extension_settings[extensionName].directionPrompt = $(this).val();
-        saveSettingsDebounced();
-    });
-
-    // 초기 UI 업데이트
-    updateUI();
 }
 
 // 플레이스홀더를 시스템에 적용
@@ -365,55 +320,116 @@ function addCompactUIButton() {
     compactUIButton.on('click', showCompactUIPopup);
 }
 
-// 프롬프트 주입 이벤트 리스너 - 참고 파일 방식으로 수정
-eventSource.on(event_types.CHAT_COMPLETION_PROMPT_READY, async function(eventData) {
+// 확장 메뉴 초기화
+async function initializeExtensionMenu() {
     try {
-        // 확장이 비활성화되어 있으면 리턴
-        if (!extension_settings[extensionName] || !extension_settings[extensionName].extensionEnabled) {
-            return;
-        }
-
-        const prompt = extension_settings[extensionName].directionPrompt;
-        if (!prompt || !prompt.trim()) {
-            return;
-        }
-
-        console.log(`[${extensionName}] Direction prompt 주입 중...`);
-        console.log(`[${extensionName}] 프롬프트 내용: ${prompt.substring(0, 50)}...`);
-
-        // chat history 바로 아래에 system 메시지로 삽입 (인덱스 1 위치)
-        // 참고 파일처럼 depth 0으로 설정하여 끝에 추가하는 방식으로 변경
-        eventData.chat.push({ 
-            role: 'system', 
-            content: prompt 
-        });
-
-        console.log(`[${extensionName}] Direction prompt 주입 완료`);
+        // HTML 로드 및 삽입
+        const html = await $.get(`/scripts/extensions/third-party/${extensionName}/settings.html`);
+        $('#extensions_settings').append(html);
+        
+        // UI 업데이트
+        updateExtensionMenuUI();
+        
+        // 이벤트 핸들러 설정
+        setupExtensionMenuEventHandlers();
+        
+        console.log(`[${extensionName}] 확장 메뉴 초기화 완료`);
     } catch (error) {
-        console.error(`[${extensionName}] 프롬프트 주입 오류:`, error);
+        console.error(`[${extensionName}] 확장 메뉴 초기화 실패:`, error);
     }
-});
+}
+
+// 확장 메뉴 UI 업데이트
+function updateExtensionMenuUI() {
+    const settings = extension_settings[extensionName];
+    
+    // 활성화 체크박스 상태 설정
+    $('#direction_manager_enabled').prop('checked', settings.extensionEnabled);
+    
+    // 프롬프트 텍스트 설정
+    $('#direction_prompt_text').val(settings.directionPrompt || DEFAULT_DIRECTION_PROMPT);
+}
+
+// 확장 메뉴 이벤트 핸들러 설정
+function setupExtensionMenuEventHandlers() {
+    // 활성화 체크박스 변경 이벤트
+    $('#direction_manager_enabled').on('change', function() {
+        extension_settings[extensionName].extensionEnabled = $(this).is(':checked');
+        saveSettingsDebounced();
+    });
+    
+    // 프롬프트 텍스트 변경 이벤트 (실시간 저장)
+    $('#direction_prompt_text').on('input', function() {
+        extension_settings[extensionName].directionPrompt = $(this).val();
+        saveSettingsDebounced();
+    });
+    
+    // 기본값 초기화 버튼
+    $('#direction_reset_prompt').on('click', function() {
+        $('#direction_prompt_text').val(DEFAULT_DIRECTION_PROMPT);
+        extension_settings[extensionName].directionPrompt = DEFAULT_DIRECTION_PROMPT;
+        saveSettingsDebounced();
+    });
+}
+
+// 프롬프트 주입 함수
+function injectDirectionPrompt(data) {
+    const settings = extension_settings[extensionName];
+    
+    // 확장이 비활성화되어 있으면 주입하지 않음
+    if (!settings.extensionEnabled) {
+        return;
+    }
+    
+    // 프롬프트가 비어있으면 주입하지 않음
+    if (!settings.directionPrompt || settings.directionPrompt.trim() === '') {
+        return;
+    }
+    
+    // 플레이스홀더 치환
+    let processedPrompt = settings.directionPrompt;
+    
+    // {{direction}} 플레이스홀더 치환
+    if (settings.direction.enabled && settings.direction.content) {
+        processedPrompt = processedPrompt.replace(/\{\{direction\}\}/g, settings.direction.content);
+    } else {
+        processedPrompt = processedPrompt.replace(/\{\{direction\}\}/g, '');
+    }
+    
+    // {{char}} 플레이스홀더 치환
+    if (settings.char.enabled && settings.char.content) {
+        processedPrompt = processedPrompt.replace(/\{\{char\}\}/g, settings.char.content);
+    }
+    
+    // {{user}} 플레이스홀더 치환
+    if (settings.user.enabled && settings.user.content) {
+        processedPrompt = processedPrompt.replace(/\{\{user\}\}/g, settings.user.content);
+    }
+    
+    // chat history 바로 아래에 system 메시지로 삽입
+    if (data.messages && Array.isArray(data.messages)) {
+        // system 메시지 생성
+        const systemMessage = {
+            role: 'system',
+            content: processedPrompt
+        };
+        
+        // chat history 바로 다음에 삽입 (인덱스 1에 삽입)
+        data.messages.splice(1, 0, systemMessage);
+    }
+}
 
 // 확장 초기화
 jQuery(async () => {
-    // 설정 HTML 로드
-    const settingsHtml = await $.get(`${extensionFolderPath}/settings.html`);
-
     await loadSettings();
     applyAllPlaceholders();
     
-    // 설정 페이지 생성
-    await createSettings(settingsHtml);
+    // 확장 메뉴 초기화
+    await initializeExtensionMenu();
     
     // 컴팩트 UI 버튼 추가
     addCompactUIButton();
-
-    // 확장 설정 버튼 클릭 시 UI 업데이트
-    $('#extensions-settings-button').on('click', function() {
-        setTimeout(() => {
-            updateUI();
-        }, 200);
-    });
-
-    console.log(`[${extensionName}] 확장 초기화 완료`);
+    
+    // 프롬프트 주입 이벤트 리스너 등록
+    eventSource.on(event_types.CHAT_COMPLETION_SETTINGS_READY, injectDirectionPrompt);
 });
