@@ -1,6 +1,6 @@
 // Direction-Manager 확장 - 3개 고정 플레이스홀더 관리 (컴팩트 UI 전용)
 import { extension_settings, getContext } from "../../../extensions.js";
-import { saveSettingsDebounced } from "../../../../script.js";
+import { saveSettingsDebounced, eventSource, event_types } from "../../../../script.js";
 
 // 확장 설정
 const extensionName = "Direction-Manager";
@@ -18,7 +18,15 @@ const defaultSettings = {
     user: {
         enabled: true,
         content: ""
-    }
+    },
+    extensionEnabled: true,
+    directionPrompt: `## Directions
+
+- Craft a story based on the director's forthcoming instructions. Feel free to adhere strictly to the directions or embellish them for a more compelling narrative.
+
+- The director is only providing a preliminary draft; refine the sentences into natural-sounding prose instead of directly quoting them. Feel free to embellish them for a more compelling narrative. Enhance the plausibility to ensure the director's proposed narrative unfolds seamlessly.
+
+[Direction(If blank, respond freely): {{direction}}]`
 };
 
 // 현재 선택된 플레이스홀더 인덱스
@@ -40,8 +48,58 @@ async function loadSettings() {
     extension_settings[extensionName] = extension_settings[extensionName] || {};
     if (Object.keys(extension_settings[extensionName]).length === 0) {
         Object.assign(extension_settings[extensionName], defaultSettings);
+    } else {
+        // 새로운 설정 항목들이 없으면 기본값으로 추가
+        if (extension_settings[extensionName].extensionEnabled === undefined) {
+            extension_settings[extensionName].extensionEnabled = defaultSettings.extensionEnabled;
+        }
+        if (extension_settings[extensionName].directionPrompt === undefined) {
+            extension_settings[extensionName].directionPrompt = defaultSettings.directionPrompt;
+        }
     }
 }
+
+// UI 업데이트
+function updateUI() {
+    // 설정 폼이 존재할 때만 업데이트
+    if ($('#direction_manager_enabled').length) {
+        $('#direction_manager_enabled').prop(
+            'checked',
+            extension_settings[extensionName].extensionEnabled
+        );
+        $('#direction_prompt_text').val(
+            extension_settings[extensionName].directionPrompt
+        );
+    }
+}
+
+// 설정 페면 생성
+async function createSettings(settingsHtml) {
+    // 설정 컨테이너 생성
+    if (!$('#direction_manager_container').length) {
+        $('#extensions_settings2').append(
+            '<div id="direction_manager_container" class="extension_container"></div>'
+        );
+    }
+
+    $('#direction_manager_container').empty().append(settingsHtml);
+
+    // 이벤트 핸들러 추가
+    $('#direction_manager_enabled').on('change', function() {
+        extension_settings[extensionName].extensionEnabled = $(this).prop('checked');
+        updateUI();
+        saveSettingsDebounced();
+    });
+
+    $('#direction_prompt_text').on('input', function() {
+        extension_settings[extensionName].directionPrompt = $(this).val();
+        saveSettingsDebounced();
+    });
+
+    // 초기 UI 업데이트
+    updateUI();
+}
+
 
 // 플레이스홀더를 시스템에 적용
 function applyPlaceholderToSystem(placeholder) {
@@ -308,11 +366,51 @@ function addCompactUIButton() {
     compactUIButton.on('click', showCompactUIPopup);
 }
 
+// 프롬프트 주입 이벤트 리스너
+eventSource.on(event_types.CHAT_COMPLETION_PROMPT_READY, async function(eventData) {
+    try {
+        // 확장이 비활성화되어 있으면 리턴
+        if (!extension_settings[extensionName] || !extension_settings[extensionName].extensionEnabled) {
+            return;
+        }
+
+        const prompt = extension_settings[extensionName].directionPrompt;
+        if (!prompt || !prompt.trim()) {
+            return;
+        }
+
+        console.log(`[${extensionName}] Direction prompt 주입 중...`);
+
+        // chat history 바로 아래에 system 메시지로 삽입
+        eventData.chat.splice(1, 0, {
+            role: 'system',
+            content: prompt
+        });
+
+        console.log(`[${extensionName}] Direction prompt 주입 완료`);
+    } catch (error) {
+        console.error(`[${extensionName}] 프롬프트 주입 오류:`, error);
+    }
+});
+
 // 확장 초기화
 jQuery(async () => {
+    // 설정 HTML 로드
+    const settingsHtml = await $.get(`${extensionFolderPath}/settings.html`);
+
     await loadSettings();
     applyAllPlaceholders();
     
+    // 설정 페이지 생성
+    await createSettings(settingsHtml);
+    
     // 컴팩트 UI 버튼 추가
     addCompactUIButton();
+
+    // 확장 설정 버튼 클릭 시 UI 업데이트
+    $('#extensions-settings-button').on('click', function() {
+        setTimeout(() => {
+            updateUI();
+        }, 200);
+    });
 });
