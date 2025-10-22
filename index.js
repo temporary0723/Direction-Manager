@@ -30,7 +30,8 @@ const defaultSettings = {
     },
     // 확장 메뉴 설정
     extensionEnabled: true,
-    directionPrompt: DEFAULT_DIRECTION_PROMPT
+    directionPrompt: DEFAULT_DIRECTION_PROMPT,
+    promptDepth: 0  // 0: Chat History 끝에 삽입, >0: 끝에서부터 N번째 위치에 삽입
 };
 
 // 현재 선택된 플레이스홀더 인덱스
@@ -369,6 +370,9 @@ function updateExtensionMenuUI() {
     
     // 프롬프트 텍스트 설정
     $('#direction_prompt_text').val(settings.directionPrompt || DEFAULT_DIRECTION_PROMPT);
+    
+    // Depth 설정
+    $('#direction_prompt_depth').val(settings.promptDepth || 0);
 }
 
 // 확장 메뉴 이벤트 핸들러 설정
@@ -404,11 +408,20 @@ function setupExtensionMenuEventHandlers() {
         extension_settings[extensionName].directionPrompt = $(this).val();
         saveSettingsDebounced();
     });
-    
+
+    // Depth 설정 변경 이벤트
+    $('#direction_prompt_depth').on('input', function() {
+        const value = parseInt(String($(this).val()));
+        extension_settings[extensionName].promptDepth = isNaN(value) ? 0 : value;
+        saveSettingsDebounced();
+    });
+
     // 기본값 초기화 버튼
     $('#direction_reset_prompt').on('click', function() {
         $('#direction_prompt_text').val(DEFAULT_DIRECTION_PROMPT);
+        $('#direction_prompt_depth').val(0);
         extension_settings[extensionName].directionPrompt = DEFAULT_DIRECTION_PROMPT;
+        extension_settings[extensionName].promptDepth = 0;
         saveSettingsDebounced();
     });
 }
@@ -452,7 +465,7 @@ function injectDirectionPrompt(data) {
         processedPrompt = processedPrompt.replace(/\{\{user\}\}/g, settings.user.content);
     }
     
-    // chat history 바로 아래에 system 메시지로 삽입
+    // Chat History 바로 아래에 system 메시지로 삽입
     if (data.messages && Array.isArray(data.messages)) {
         // system 메시지 생성
         const systemMessage = {
@@ -460,8 +473,29 @@ function injectDirectionPrompt(data) {
             content: processedPrompt
         };
         
-        // chat history 바로 다음에 삽입 (인덱스 1에 삽입)
-        data.messages.splice(1, 0, systemMessage);
+        const depth = settings.promptDepth || 0;
+        
+        // Chat History의 끝을 찾아서 그 바로 다음에 삽입
+        // Chat History (user/assistant 메시지들)가 모두 끝난 후에 삽입
+        let insertIndex = data.messages.length; // 기본적으로 맨 끝에 삽입
+        
+        // 뒤에서부터 찾아서 마지막 user/assistant 메시지 다음 위치 찾기
+        for (let i = data.messages.length - 1; i >= 0; i--) {
+            if (data.messages[i].role === 'user' || data.messages[i].role === 'assistant') {
+                insertIndex = i + 1; // 마지막 Chat History 메시지 바로 다음
+                break;
+            }
+        }
+        
+        // Depth 설정에 따라 삽입 위치 조정
+        if (depth === 0) {
+            // Chat History 끝에 삽입
+            data.messages.splice(insertIndex, 0, systemMessage);
+        } else {
+            // Chat History 끝에서부터 N번째 위치에 삽입
+            const targetIndex = Math.max(insertIndex - depth, insertIndex);
+            data.messages.splice(targetIndex, 0, systemMessage);
+        }
     }
 }
 
