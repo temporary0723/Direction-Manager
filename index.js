@@ -428,22 +428,32 @@ function setupExtensionMenuEventHandlers() {
 
 // 프롬프트 주입 함수
 function injectDirectionPrompt(data) {
-    const settings = extension_settings[extensionName];
+    console.log(`[${extensionName}] injectDirectionPrompt 호출됨`);
     
+    const settings = extension_settings[extensionName];
+    console.log(`[${extensionName}] 현재 설정:`, settings);
+
     // 확장이 비활성화되어 있으면 주입하지 않음
     if (!settings.extensionEnabled) {
+        console.log(`[${extensionName}] 확장이 비활성화되어 있음`);
         return;
     }
-    
+
     // Direction 토글이 비활성화되어 있으면 주입하지 않음
     if (!settings.direction.enabled) {
+        console.log(`[${extensionName}] Direction 토글이 비활성화되어 있음`);
+        return;
+    }
+
+    // 프롬프트가 비어있으면 주입하지 않음
+    if (!settings.directionPrompt || settings.directionPrompt.trim() === '') {
+        console.log(`[${extensionName}] Direction 프롬프트가 비어있음`);
         return;
     }
     
-    // 프롬프트가 비어있으면 주입하지 않음
-    if (!settings.directionPrompt || settings.directionPrompt.trim() === '') {
-        return;
-    }
+    console.log(`[${extensionName}] 프롬프트 주입 시작 - 프롬프트: "${settings.directionPrompt.substring(0, 50)}..."`);
+    console.log(`[${extensionName}] 메시지 배열 길이: ${data.messages ? data.messages.length : 'undefined'}`);
+    console.log(`[${extensionName}] 메시지 배열:`, data.messages);
     
     // 플레이스홀더 치환
     let processedPrompt = settings.directionPrompt;
@@ -467,6 +477,8 @@ function injectDirectionPrompt(data) {
     
     // Chat History 바로 아래에 system 메시지로 삽입
     if (data.messages && Array.isArray(data.messages)) {
+        console.log(`[${extensionName}] 메시지 배열이 유효함, 처리된 프롬프트: "${processedPrompt.substring(0, 100)}..."`);
+        
         // system 메시지 생성
         const systemMessage = {
             role: 'system',
@@ -474,28 +486,41 @@ function injectDirectionPrompt(data) {
         };
         
         const depth = settings.promptDepth || 0;
+        console.log(`[${extensionName}] 설정된 Depth: ${depth}`);
         
         // Chat History의 끝을 찾아서 그 바로 다음에 삽입
         // Chat History (user/assistant 메시지들)가 모두 끝난 후에 삽입
         let insertIndex = data.messages.length; // 기본적으로 맨 끝에 삽입
+        console.log(`[${extensionName}] 초기 삽입 인덱스 (배열 끝): ${insertIndex}`);
         
         // 뒤에서부터 찾아서 마지막 user/assistant 메시지 다음 위치 찾기
         for (let i = data.messages.length - 1; i >= 0; i--) {
+            console.log(`[${extensionName}] 인덱스 ${i} 메시지 역할: ${data.messages[i].role}`);
             if (data.messages[i].role === 'user' || data.messages[i].role === 'assistant') {
                 insertIndex = i + 1; // 마지막 Chat History 메시지 바로 다음
+                console.log(`[${extensionName}] Chat History 끝 발견, 삽입 인덱스: ${insertIndex}`);
                 break;
             }
         }
         
         // Depth 설정에 따라 삽입 위치 조정
+        let finalIndex;
         if (depth === 0) {
             // Chat History 끝에 삽입
-            data.messages.splice(insertIndex, 0, systemMessage);
+            finalIndex = insertIndex;
+            console.log(`[${extensionName}] Depth 0: Chat History 끝에 삽입, 최종 인덱스: ${finalIndex}`);
         } else {
             // Chat History 끝에서부터 N번째 위치에 삽입
-            const targetIndex = Math.max(insertIndex - depth, insertIndex);
-            data.messages.splice(targetIndex, 0, systemMessage);
+            finalIndex = Math.max(insertIndex - depth, insertIndex);
+            console.log(`[${extensionName}] Depth ${depth}: 조정된 최종 인덱스: ${finalIndex}`);
         }
+        
+        console.log(`[${extensionName}] 삽입 전 메시지 배열 길이: ${data.messages.length}`);
+        data.messages.splice(finalIndex, 0, systemMessage);
+        console.log(`[${extensionName}] 삽입 후 메시지 배열 길이: ${data.messages.length}`);
+        console.log(`[${extensionName}] 프롬프트 주입 완료!`);
+    } else {
+        console.log(`[${extensionName}] 메시지 배열이 유효하지 않음`);
     }
 }
 
@@ -511,5 +536,6 @@ jQuery(async () => {
     addCompactUIButton();
     
     // 프롬프트 주입 이벤트 리스너 등록
+    console.log(`[${extensionName}] CHAT_COMPLETION_SETTINGS_READY 이벤트에 프롬프트 주입 함수 등록`);
     eventSource.on(event_types.CHAT_COMPLETION_SETTINGS_READY, injectDirectionPrompt);
 });
