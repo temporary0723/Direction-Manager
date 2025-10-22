@@ -31,7 +31,7 @@ const defaultSettings = {
     // 확장 메뉴 설정
     extensionEnabled: true,
     directionPrompt: DEFAULT_DIRECTION_PROMPT,
-    promptDepth: 0  // 0: Chat History 끝에 삽입, >0: 끝에서부터 N번째 위치에 삽입
+    promptDepth: 1  // 0: Chat History 끝에 삽입, >0: 끝에서부터 N번째 위치에 삽입
 };
 
 // 현재 선택된 플레이스홀더 인덱스
@@ -372,7 +372,7 @@ function updateExtensionMenuUI() {
     $('#direction_prompt_text').val(settings.directionPrompt || DEFAULT_DIRECTION_PROMPT);
     
     // Depth 설정
-    $('#direction_prompt_depth').val(settings.promptDepth || 0);
+    $('#direction_prompt_depth').val(settings.promptDepth || 1);
 }
 
 // 확장 메뉴 이벤트 핸들러 설정
@@ -412,16 +412,16 @@ function setupExtensionMenuEventHandlers() {
     // Depth 설정 변경 이벤트
     $('#direction_prompt_depth').on('input', function() {
         const value = parseInt(String($(this).val()));
-        extension_settings[extensionName].promptDepth = isNaN(value) ? 0 : value;
+        extension_settings[extensionName].promptDepth = isNaN(value) ? 1 : value;
         saveSettingsDebounced();
     });
 
     // 기본값 초기화 버튼
     $('#direction_reset_prompt').on('click', function() {
         $('#direction_prompt_text').val(DEFAULT_DIRECTION_PROMPT);
-        $('#direction_prompt_depth').val(0);
+        $('#direction_prompt_depth').val(1);
         extension_settings[extensionName].directionPrompt = DEFAULT_DIRECTION_PROMPT;
-        extension_settings[extensionName].promptDepth = 0;
+        extension_settings[extensionName].promptDepth = 1;
         saveSettingsDebounced();
     });
 }
@@ -465,10 +465,7 @@ function injectDirectionPrompt(eventData) {
         processedPrompt = processedPrompt.replace(/\{\{user\}\}/g, settings.user.content);
     }
     
-    const depth = settings.promptDepth || 0;
-    
-    console.log(`[Direction-Manager] 프롬프트 주입: depth=${depth}`);
-    console.log(`[Direction-Manager] eventData 구조:`, Object.keys(eventData));
+    const depth = settings.promptDepth || 1;
     
     // 참고 파일 방식: eventData.chat 또는 eventData.messages 확인
     let messages = eventData.chat || eventData.messages;
@@ -480,21 +477,15 @@ function injectDirectionPrompt(eventData) {
             content: processedPrompt
         };
         
-        console.log(`[Direction-Manager] 총 메시지 수: ${messages.length}`);
-        
         // 참고 파일의 방식을 따라 depth 적용
         if (depth === 0) {
             // 맨 끝에 추가
             messages.push(systemMessage);
-            console.log(`[Direction-Manager] 메시지 끝에 추가 (인덱스: ${messages.length - 1})`);
         } else {
             // 끝에서부터 N번째 위치에 삽입
             const insertIndex = Math.max(messages.length - depth, 0);
             messages.splice(insertIndex, 0, systemMessage);
-            console.log(`[Direction-Manager] 인덱스 ${insertIndex}에 삽입 (끝에서 ${depth}번째)`);
         }
-    } else {
-        console.warn(`[Direction-Manager] 메시지 배열을 찾을 수 없음:`, eventData);
     }
 }
 
