@@ -7,13 +7,13 @@ const extensionName = "Direction-Manager";
 const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
 const extensionSettings = extension_settings[extensionName];
 // 기본 Direction 프롬프트
-const DEFAULT_DIRECTION_PROMPT = `## Directions
+const DEFAULT_DIRECTION_PROMPT = `<direction>
+- Resume the story based on the director's instructions below.
+- The director only provides drafts; refine them into natural prose instead of directly quoting the sentences.
+- Creatively construct and fill in any parts lacking persuasive causality so that the narrative suggested by the director unfolds smoothly.
 
-- Craft a story based on the director's forthcoming instructions. Feel free to adhere strictly to the directions or embellish them for a more compelling narrative.
-
-- The director is only providing a preliminary draft; refine the sentences into natural-sounding prose instead of directly quoting them. Feel free to embellish them for a more compelling narrative. Enhance the plausibility to ensure the director's proposed narrative unfolds seamlessly.
-
-[Direction(If blank, respond freely): {{direction}}]`;
+[Direction(If blank, develop the story as you see fit): {{direction}}]
+</direction>`;
 
 const defaultSettings = {
     direction: {
