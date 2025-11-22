@@ -17,15 +17,15 @@ const DEFAULT_DIRECTION_PROMPT = `<direction>
 
 const defaultSettings = {
     direction: {
-        enabled: true,
+        enabled: false,
         content: ""
     },
     char: {
-        enabled: true,
+        enabled: false,
         content: ""
     },
     user: {
-        enabled: true,
+        enabled: false,
         content: ""
     },
     // 확장 메뉴 설정
